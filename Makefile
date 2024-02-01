@@ -44,7 +44,7 @@ TMPFS_SIZE := 4G
 # Qt config
 QT_VERSION := 6.6.2
 
-TEST_CMD := ls
+TEST_CMD := ./tests.sh
 
 PROGRESS_OUTPUT := plain
 

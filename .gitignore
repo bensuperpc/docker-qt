@@ -1,4 +1,2 @@
-builds/*
-sstate-cache/*
-downloads/*
+build/*
 .vscode/settings.json

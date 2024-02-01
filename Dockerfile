@@ -10,7 +10,7 @@ RUN apt-get update && apt-get -y install \
 	build-essential debianutils mesa-common-dev \
     ccache ninja-build cmake distcc icecc meson \
 	apt-transport-https ca-certificates gnupg2 \
-	locales lsb-release openssl git python-html5lib \
+	locales lsb-release openssl git \
 # Qt dependencies
     libfontconfig1-dev libfreetype6-dev libx11-dev \
     libxext-dev libxfixes-dev libxi-dev libxrender-dev \

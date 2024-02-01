@@ -31,7 +31,7 @@ You can use this image to build your qt project in docker.
 
 ### Tested on
 
-With this configuration, you can build qt in 1h30:
+With this configuration, you can build qt in 40min:
 
 - AMD Ryzen 7 5800H (8 cores/16 threads at 3.2 GHz/4.4 GHz)
 - 32 GB RAM DDR4 3200 MHz
