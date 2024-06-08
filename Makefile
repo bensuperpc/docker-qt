@@ -22,7 +22,7 @@ AUTHOR := bensuperpc
 REGISTRY := docker.io
 WEB_SITE := bensuperpc.org
 
-IMAGE_VERSION := 6.7.0
+IMAGE_VERSION := 6.7.1
 
 USER_NAME := $(shell whoami)
 USER_UID := $(shell id -u ${USER})
@@ -39,6 +39,7 @@ BUILD_MEMORY := 16GB
 
 # Qt config
 QT_VERSION := $(IMAGE_VERSION)
+QT_CONFIG_ARGS := -nomake examples -nomake tests -opensource -confirm-license -release
 
 TEST_CMD := ./tests.sh
 
@@ -91,7 +92,7 @@ $(BASE_IMAGE_TAGS): $(Dockerfile)
 		--build-arg VCS_REF=$(GIT_SHA) --build-arg VCS_URL=$(GIT_ORIGIN) \
 		--build-arg AUTHOR=$(AUTHOR) --build-arg URL=$(WEB_SITE) \
 		--build-arg USER_NAME=$(USER_NAME) --build-arg USER_UID=$(USER_UID) --build-arg USER_GID=$(USER_GID) \
-		--build-arg QT_VERSION=$(QT_VERSION) \
+		--build-arg QT_VERSION=$(QT_VERSION) --build-arg QT_CONFIG_ARGS="$(QT_CONFIG_ARGS)" \
 		$(DOCKER_DRIVER)
 
 .SECONDEXPANSION:
