@@ -39,9 +39,9 @@ BUILD_MEMORY := 16GB
 
 # Qt config
 QT_VERSION := $(IMAGE_VERSION)
-QT_CONFIG_ARGS := -nomake examples -nomake tests -opensource -confirm-license -release
+QT_CONFIG_ARGS := -skip qtwebengine -nomake examples -nomake tests -opensource -confirm-license -release
 
-TEST_CMD := ./tests.sh
+TEST_CMD := ./tests/tests.sh
 
 PROGRESS_OUTPUT := plain
 

@@ -5,6 +5,7 @@
 #include <QQmlContext>
 #include <QQuickWindow>
 #include <QtGlobal>
+#include <QWidget>
 
 int main(int argc, char* argv[]) {
     qDebug() << "Hello World from Qt" << qVersion();

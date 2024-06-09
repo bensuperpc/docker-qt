@@ -8,8 +8,8 @@ project(
     LANGUAGES C CXX
 )
 
-find_package(QT NAMES Qt6 COMPONENTS Quick QuickControls2 Gui Core Qml Charts Multimedia Widgets Concurrent SerialPort)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Quick QuickControls2 Gui Core Qml Charts Multimedia Widgets Concurrent SerialPort)
+find_package(QT NAMES Qt6 COMPONENTS Quick QuickControls2 Gui Core Qml Charts Multimedia Widgets Concurrent SerialPort REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Quick QuickControls2 Gui Core Qml Charts Multimedia Widgets Concurrent SerialPort REQUIRED)
 
 if (Qt${QT_VERSION_MAJOR}_FOUND)
     if (Qt${QT_VERSION_MAJOR}_VERSION VERSION_GREATER_EQUAL 6.3)

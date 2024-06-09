@@ -27,7 +27,7 @@ RUN apt-get update && apt-get -y install \
     ffmpeg libpulse-dev libasound2-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libavcodec-dev libavfilter-dev libvpx-dev \
     libopus-dev libx264-dev libx265-dev libmp3lame-dev libvorbis-dev libtheora-dev libspeex-dev libopenal-dev libsndfile1-dev \
     libflac-dev libogg-dev libopusfile-dev libmodplug-dev libmpg123-dev libsndio-dev libwavpack-dev libfaad-dev libgsm1-dev libdv4-dev \
-    libproxy-dev libkrb5-dev libicu-dev \
+    libproxy-dev libkrb5-dev libicu-dev zlib1g-dev \
     && apt-get clean \
     && apt-get -y autoremove --purge \
     && rm -rf /var/lib/apt/lists/*
@@ -44,7 +44,7 @@ ENV QT_VERSION=${QT_VERSION}
 RUN git clone --recurse-submodules --shallow-submodules --depth 1 --branch $QT_VERSION https://github.com/qt/qt5.git
 WORKDIR /qt5/qt5
 
-ARG QT_CONFIG_ARGS="-nomake docs -nomake examples -nomake demos -nomake tests -opensource -confirm-license -release"
+ARG QT_CONFIG_ARGS="-skip qtwebengine -nomake examples -nomake tests -opensource -confirm-license -release"
 ENV QT_CONFIG_ARGS=${QT_CONFIG_ARGS}
 RUN ./configure -prefix /usr/local/Qt-$QT_VERSION $QT_CONFIG_ARGS
 
@@ -65,7 +65,10 @@ ENV LC_ALL en_US.UTF-8
 
 RUN apt-get update && apt-get -y install \
 # All needed packages
-    build-essential
+    build-essential cmake extra-cmake-modules ninja-build \
+    libgl1-mesa-dev libvulkan-dev libglib2.0-dev \
+    libdbus-1-dev libxkbcommon-x11-dev \
+    && apt-get -y autoremove --purge
 
 ARG BUILD_DATE
 ARG VCS_REF
@@ -80,8 +83,6 @@ ENV IMAGE_VERSION=${IMAGE_VERSION}
 ARG CCACHE_MAXSIZE=16G
 ENV CCACHE_MAXSIZE=${CCACHE_MAXSIZE}
 
-ENV LANG en_US.utf8
-ENV LC_ALL en_US.UTF-8
 ENV TERM xterm-256color
 
 LABEL maintainer="Bensuperpc"

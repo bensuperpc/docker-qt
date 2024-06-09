@@ -8,7 +8,7 @@ ApplicationWindow {
 
     visible: true
     title: qsTr("Hello World")
-
+ 
     Label {
         text: qsTr("Hello World from Qt Quick")
         anchors.centerIn: parent
