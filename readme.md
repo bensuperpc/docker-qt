@@ -33,12 +33,13 @@ You can use this image to build your qt project in docker.
 
 With this configuration, you can build qt in 40min (2h30 whith webengine etc...):
 
-- AMD Ryzen 7 5800H (8 cores/16 threads at 3.2 GHz/4.4 GHz)
+- AMD Ryzen 7 5700x (8 cores/16 threads at 3.4 GHz/4.6 GHz)
 - 32 GB RAM DDR4 3200 MHz
-- 1 TB SSD NVMe Samsung 980 Pro (PCIe 3.0 x4)
+- 2*2 TB SSD NVMe Samsung 970 Evo plus (PCIe 3.0 x4 and x2)
+- Nvidia RTX 3060 Ti
 - 100 Mbps internet
 - Manjaro Linux
-- qt 6.7.1 (05/2024)
+- qt 6.7.1 (06/2024)
 
 ## How to use docker-qt
 
