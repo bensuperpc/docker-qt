@@ -36,15 +36,12 @@ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen
 
 FROM requirements as builder
-ARG QT_VERSION=6.7.1
-ENV QT_VERSION=${QT_VERSION}
-
 WORKDIR /qt5
-ARG QT_VERSION=6.7.1
-ENV QT_VERSION=${QT_VERSION}
 # Keep unoptimized for avoid redownload everything when build fail
 RUN git clone https://github.com/qt/qt5.git
 WORKDIR /qt5/qt5
+ARG QT_VERSION=6.7.1
+ENV QT_VERSION=${QT_VERSION}
 RUN git switch $QT_VERSION
 RUN perl init-repository
 
