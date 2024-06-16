@@ -73,6 +73,7 @@ RUN apt-get update && apt-get -y install \
     build-essential cmake extra-cmake-modules ninja-build \
     libgl1-mesa-dev libvulkan-dev libglib2.0-dev \
     libdbus-1-dev libxkbcommon-x11-dev \
+    && apt-get clean \
     && apt-get -y autoremove --purge
 
 ARG BUILD_DATE
