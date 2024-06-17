@@ -56,11 +56,6 @@ RUN cmake --install .
 ARG DOCKER_IMAGE=debian:bookworm
 FROM ${DOCKER_IMAGE} as final
 
-ARG QT_VERSION=6.7.1
-ENV QT_VERSION=${QT_VERSION}
-COPY --from=builder /usr/local/Qt-$QT_VERSION/ /usr/local/Qt-$QT_VERSION/
-ENV PATH="${PATH}:/usr/local/Qt-$QT_VERSION/bin"
-
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG en_US.utf8
 ENV LC_ALL en_US.UTF-8
@@ -68,10 +63,15 @@ ENV LC_ALL en_US.UTF-8
 RUN apt-get update && apt-get -y install \
 # Essential packages to build and link to right libraries
     build-essential cmake extra-cmake-modules ninja-build \
-    libgl1-mesa-dev libvulkan-dev libglib2.0-dev \
+    libgl1-mesa-dev libvulkan-dev libssl-dev libglib2.0-dev \
     libdbus-1-dev libxkbcommon-x11-dev \
     && apt-get clean \
     && apt-get -y autoremove --purge
+
+ARG QT_VERSION=6.7.1
+ENV QT_VERSION=${QT_VERSION}
+COPY --from=builder /usr/local/Qt-$QT_VERSION/ /usr/local/Qt-$QT_VERSION/
+ENV PATH="${PATH}:/usr/local/Qt-$QT_VERSION/bin"
 
 ARG BUILD_DATE
 ARG VCS_REF
