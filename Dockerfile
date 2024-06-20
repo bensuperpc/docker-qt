@@ -3,8 +3,6 @@ ARG DOCKER_IMAGE=debian:bookworm
 FROM ${DOCKER_IMAGE} as requirements
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG en_US.utf8
-ENV LC_ALL en_US.UTF-8
 
 RUN apt-get update && apt-get -y install \
 # All needed packages
@@ -37,13 +35,11 @@ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
 
 FROM requirements as builder
 WORKDIR /qt5
-# Keep unoptimized for avoid redownload everything when build fail
 RUN git clone https://github.com/qt/qt5.git
 WORKDIR /qt5/qt5
 ARG QT_VERSION=6.7.1
 ENV QT_VERSION=${QT_VERSION}
-RUN git switch $QT_VERSION
-RUN perl init-repository
+RUN git switch $QT_VERSION && perl init-repository
 
 # Default configuration (disable webengine, it's take a lot of time to build, even with high end CPU)
 ARG QT_CONFIG_ARGS="-skip qtwebengine -nomake examples -nomake tests -opensource -confirm-license -release"
@@ -57,8 +53,6 @@ ARG DOCKER_IMAGE=debian:bookworm
 FROM ${DOCKER_IMAGE} as final
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG en_US.utf8
-ENV LC_ALL en_US.UTF-8
 
 RUN apt-get update && apt-get -y install \
 # Essential packages to build and link to right libraries
@@ -73,8 +67,8 @@ ENV QT_VERSION=${QT_VERSION}
 COPY --from=builder /usr/local/Qt-$QT_VERSION/ /usr/local/Qt-$QT_VERSION/
 ENV PATH="${PATH}:/usr/local/Qt-$QT_VERSION/bin"
 
-ARG BUILD_DATE
-ARG VCS_REF
+ARG BUILD_DATE=""
+ARG VCS_REF=""
 ARG VCS_URL=""
 ARG PROJECT_NAME=""
 ARG AUTHOR=""
@@ -90,7 +84,7 @@ ENV TERM xterm-256color
 
 LABEL maintainer="Bensuperpc"
 LABEL author="Bensuperpc"
-LABEL description=""
+LABEL description="Docker image with qt"
 
 LABEL org.label-schema.schema-version="1.0" \
       org.label-schema.build-date=${BUILD_DATE} \
@@ -104,7 +98,7 @@ LABEL org.label-schema.schema-version="1.0" \
       org.label-schema.docker.cmd=""
 
 
-ARG USER_NAME=bensuperpc
+ARG USER_NAME=user
 ENV HOME=/home/$USER_NAME
 ARG USER_UID=1000
 ARG USER_GID=1000
