@@ -3,8 +3,6 @@ ARG DOCKER_IMAGE=debian:bookworm
 FROM ${DOCKER_IMAGE} as requirements
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG en_US.utf8
-ENV LC_ALL en_US.UTF-8
 
 RUN apt-get update && apt-get -y install \
 # All needed packages
@@ -33,17 +31,20 @@ RUN apt-get update && apt-get -y install \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-    locale-gen
+    locale-gen en_US.UTF-8 && \
+    update-locale LANG=en_US.UTF-8
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 FROM requirements as builder
 WORKDIR /qt5
-# Keep unoptimized for avoid redownload everything when build fail
 RUN git clone https://github.com/qt/qt5.git
 WORKDIR /qt5/qt5
-ARG QT_VERSION=6.7.1
+ARG QT_VERSION=6.7.2
 ENV QT_VERSION=${QT_VERSION}
-RUN git switch $QT_VERSION
-RUN perl init-repository
+RUN git switch $QT_VERSION && perl init-repository
 
 # Default configuration (disable webengine, it's take a lot of time to build, even with high end CPU)
 ARG QT_CONFIG_ARGS="-skip qtwebengine -nomake examples -nomake tests -opensource -confirm-license -release"
@@ -57,24 +58,30 @@ ARG DOCKER_IMAGE=debian:bookworm
 FROM ${DOCKER_IMAGE} as final
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG en_US.utf8
-ENV LC_ALL en_US.UTF-8
 
 RUN apt-get update && apt-get -y install \
 # Essential packages to build and link to right libraries
     build-essential cmake extra-cmake-modules ninja-build \
     libgl1-mesa-dev libvulkan-dev libssl-dev libglib2.0-dev \
-    libdbus-1-dev libxkbcommon-x11-dev \
+    libdbus-1-dev libxkbcommon-x11-dev ccache bash locales \
     && apt-get clean \
     && apt-get -y autoremove --purge
 
-ARG QT_VERSION=6.7.1
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen en_US.UTF-8 && \
+    update-locale LANG=en_US.UTF-8
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+
+ARG QT_VERSION=6.7.2
 ENV QT_VERSION=${QT_VERSION}
 COPY --from=builder /usr/local/Qt-$QT_VERSION/ /usr/local/Qt-$QT_VERSION/
 ENV PATH="${PATH}:/usr/local/Qt-$QT_VERSION/bin"
 
-ARG BUILD_DATE
-ARG VCS_REF
+ARG BUILD_DATE=""
+ARG VCS_REF=""
 ARG VCS_URL=""
 ARG PROJECT_NAME=""
 ARG AUTHOR=""
@@ -86,11 +93,11 @@ ENV IMAGE_VERSION=${IMAGE_VERSION}
 ARG CCACHE_MAXSIZE=16G
 ENV CCACHE_MAXSIZE=${CCACHE_MAXSIZE}
 
-ENV TERM xterm-256color
+ENV TERM=xterm-256color
 
 LABEL maintainer="Bensuperpc"
 LABEL author="Bensuperpc"
-LABEL description=""
+LABEL description="Docker image with qt"
 
 LABEL org.label-schema.schema-version="1.0" \
       org.label-schema.build-date=${BUILD_DATE} \
@@ -103,18 +110,10 @@ LABEL org.label-schema.schema-version="1.0" \
       org.label-schema.vcs-ref=${VCS_REF} \
       org.label-schema.docker.cmd=""
 
-
-ARG USER_NAME=bensuperpc
-ENV HOME=/home/$USER_NAME
-ARG USER_UID=1000
-ARG USER_GID=1000
-RUN groupadd -g $USER_GID -o $USER_NAME
-RUN useradd -m -u $USER_UID -g $USER_GID -o -s /bin/bash $USER_NAME
-USER $USER_NAME
-
-WORKDIR /home/$USER_NAME
-
-VOLUME ["/work"]
+VOLUME [ "/work" ]
 WORKDIR /work
 
-CMD ["/bin/bash", "-l"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/bin/bash", "-l"]

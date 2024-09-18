@@ -2,7 +2,7 @@
 #//                                                          //
 #//  docker-multimedia, 2023                                 //
 #//  Created: 04 February, 2023                              //
-#//  Modified: 02 February, 2024                             //
+#//  Modified: 16 June, 2024                                 //
 #//  file: -                                                 //
 #//  -                                                       //
 #//  Source:                                                 //
@@ -22,11 +22,11 @@ AUTHOR := bensuperpc
 REGISTRY := docker.io
 WEB_SITE := bensuperpc.org
 
-IMAGE_VERSION := 6.7.1
+IMAGE_VERSION := 6.7.2
 
-USER_NAME := $(shell whoami)
-USER_UID := $(shell id -u ${USER})
-USER_GID := $(shell id -g ${USER})
+USER := $(shell whoami)
+UID := $(shell id -u ${USER})
+GID := $(shell id -g ${USER})
 
 # Max CPU and memory
 CPUS := 8.0
@@ -92,7 +92,6 @@ $(BASE_IMAGE_TAGS): $(Dockerfile)
 		--build-arg IMAGE_VERSION=$(IMAGE_VERSION) --build-arg PROJECT_NAME=$(PROJECT_NAME) \
 		--build-arg VCS_REF=$(GIT_SHA) --build-arg VCS_URL=$(GIT_ORIGIN) \
 		--build-arg AUTHOR=$(AUTHOR) --build-arg URL=$(WEB_SITE) \
-		--build-arg USER_NAME=$(USER_NAME) --build-arg USER_UID=$(USER_UID) --build-arg USER_GID=$(USER_GID) \
 		--build-arg QT_VERSION=$(QT_VERSION) --build-arg QT_CONFIG_ARGS="$(QT_CONFIG_ARGS)" \
 		$(DOCKER_DRIVER)
 
@@ -102,7 +101,7 @@ $(addsuffix .build,$(BASE_IMAGE_TAGS)): $$(basename $$@)
 .SECONDEXPANSION:
 $(addsuffix .test,$(BASE_IMAGE_TAGS)): $$(basename $$@)
 	$(DOCKER_EXEC) run --rm \
-		--security-opt no-new-privileges --read-only \
+		--security-opt no-new-privileges --read-only --user $(UID):$(GID) \
 		--mount type=bind,source=$(shell pwd),target=/work --workdir /work \
 		--mount type=tmpfs,target=/tmp,tmpfs-mode=1777,tmpfs-size=$(TMPFS_SIZE) \
 		--platform $(PLATFORMS) \
@@ -111,13 +110,12 @@ $(addsuffix .test,$(BASE_IMAGE_TAGS)): $$(basename $$@)
 		$(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION)-$(DATE)-$(GIT_SHA) \
 		$(TEST_CMD)
 
-#--user $(shell id -u ${USER}):$(shell id -g ${USER})
 #--cap-drop ALL --cap-add SYS_PTRACE	  --device=/dev/kvm
 
 .SECONDEXPANSION:
 $(addsuffix .run,$(BASE_IMAGE_TAGS)): $$(basename $$@)
 	$(DOCKER_EXEC) run -it \
-		--security-opt no-new-privileges \
+		--security-opt no-new-privileges --read-only --user $(UID):$(GID) \
 		--mount type=bind,source=$(shell pwd),target=/work --workdir /work \
 		--mount type=tmpfs,target=/tmp,tmpfs-mode=1777,tmpfs-size=$(TMPFS_SIZE) \
 		--platform $(PLATFORMS) \
@@ -158,14 +156,7 @@ update:
 #   Update all docker image
 	$(foreach tag,$(BASE_IMAGE_TAGS),$(DOCKER_EXEC) pull $(BASE_IMAGE_NAME):$(tag);)
 #   Update all submodules to latest
-#   git submodule update --init --recursive
-#	git pull --recurse-submodules --all --progress --jobs=0
-
-	git submodule foreach --recursive git clean -xfd
-	git submodule foreach --recursive git reset --hard
-	git submodule update --init --recursive
-#	git submodule update --recursive --remote --force --rebase
-	git submodule update --recursive --init --remote --force
+	git submodule update --init --recursive --remote
 
 # https://github.com/linuxkit/linuxkit/tree/master/pkg/binfmt
 .PHONY: qemu
