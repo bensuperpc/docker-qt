@@ -13,15 +13,9 @@ You can use this image to build your qt project in docker.
 
 | Qt version | Debian version | image tag | Status |
 | :------: | :------: | :------: | :------: |
-| 6.7.1 | bookworm | bensuperpc/qt:debian-bookworm-6.7.1 | OK |
-| 6.7.1 | bullseye | bensuperpc/qt:debian-bullseye-6.7.1 | OK |
-| 6.7.1 | buster | bensuperpc/qt:debian-buster-6.7.1 | OK |
-| 6.6.3 | bullseye | bensuperpc/qt:debian-bullseye-6.6.3 | OK |
-| 6.6.3 | bookworm | bensuperpc/qt:debian-bookworm-6.6.3 | OK |
-| 6.6.3 | buster | bensuperpc/qt:debian-buster-6.6.3 | OK |
-| 6.5.3 | bullseye | bensuperpc/qt:debian-bullseye-6.5.3 | OK |
-| 6.5.3 | bookworm | bensuperpc/qt:debian-bookworm-6.5.3 | OK |
-| 6.5.3 | buster | bensuperpc/qt:debian-buster-6.5.3 | OK |
+| 6.7.2 | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.7.2 | OK |
+| 6.6.3 | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.6.3 | OK |
+| 6.6.3 | bullseye | docker.io/bensuperpc/qt:debian-bullseye-6.6.3 | OK |
 
 ## Requirements
 

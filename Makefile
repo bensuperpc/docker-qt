@@ -22,7 +22,7 @@ AUTHOR := bensuperpc
 REGISTRY := docker.io
 WEB_SITE := bensuperpc.org
 
-IMAGE_VERSION := 6.7.2
+IMAGE_VERSION := 6.6.3
 
 USER := $(shell whoami)
 UID := $(shell id -u ${USER})
@@ -143,7 +143,8 @@ $(addsuffix .pull,$(BASE_IMAGE_TAGS)): $$(basename $$@)
 .PHONY: clean
 clean:
 	@echo "Clean all untagged images"
-	$(DOCKER_EXEC) image prune --force --filter="dangling=true"
+	$(DOCKER) system prune -f
+#	$(DOCKE) builder prune -f
 
 .PHONY: purge
 purge: clean

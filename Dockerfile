@@ -73,7 +73,10 @@ ARG QT_VERSION=6.7.2
 ENV QT_VERSION=${QT_VERSION}
 
 COPY --from=builder /usr/local/Qt-$QT_VERSION/ /usr/local/Qt-$QT_VERSION/
-ENV PATH="${PATH}:/usr/local/Qt-$QT_VERSION/bin"
+ENV QT_DIR="/usr/local/Qt-$QT_VERSION"
+ENV Qt6_DIR="/usr/local/Qt-$QT_VERSION/lib/cmake/Qt6"
+ENV CMAKE_PREFIX_PATH="/usr/local/Qt-$QT_VERSION/lib/cmake"
+ENV PATH="/usr/local/Qt-$QT_VERSION/bin:$PATH"
 
 ARG BUILD_DATE=""
 ARG VCS_REF=""
@@ -108,4 +111,8 @@ LABEL org.label-schema.schema-version="1.0" \
 VOLUME [ "/work" ]
 WORKDIR /work
 
-ENTRYPOINT ["/bin/bash", "-l"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT [ "/entrypoint.sh" ]
+CMD [ "/bin/bash" ]
