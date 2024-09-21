@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 project(
-    GTA_SA_cheat_finder
+    test_qt_qml
     VERSION 2.0.0
     DESCRIPTION ""
     HOMEPAGE_URL "https://github.com/bensuperpc"

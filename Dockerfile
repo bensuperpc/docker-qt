@@ -1,19 +1,38 @@
-
+# Base image
 ARG DOCKER_IMAGE=debian:bookworm
-FROM ${DOCKER_IMAGE} as requirements
+FROM ${DOCKER_IMAGE} AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get -y install \
+# Essential packages to build and link to right libraries
+    build-essential git cmake extra-cmake-modules ninja-build \
+    automake autoconf libtool pkg-config \
+    libgl1-mesa-dev libvulkan-dev libssl-dev libglib2.0-dev \
+    libdbus-1-dev libxkbcommon-x11-dev ccache bash locales \
+    && apt-get clean \
+    && apt-get -y autoremove --purge \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen en_US.UTF-8 && \
+    update-locale LANG=en_US.UTF-8
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+
+# Buider image
+FROM base AS builder
+
+RUN apt-get update && apt-get -y install \
 # All needed packages
-    build-essential debianutils mesa-common-dev \
-    ninja-build cmake meson git \
+    debianutils mesa-common-dev meson \
     apt-transport-https ca-certificates gnupg2 \
-    locales lsb-release libssl-dev \
     libfontconfig1-dev libfreetype6-dev \
     libxext-dev libxfixes-dev libxi-dev libxrender-dev \
     freeglut3-dev libgl1-mesa-dev libglu1-mesa-dev \
-    libvulkan-dev mesa-vulkan-drivers \
+    mesa-vulkan-drivers lsb-release \
     libatspi2.0-dev libwayland-dev \
     xserver-xorg-dev xorg-dev \
     libegl1-mesa-dev libgles2-mesa-dev \
@@ -30,20 +49,14 @@ RUN apt-get update && apt-get -y install \
     && apt-get -y autoremove --purge \
     && rm -rf /var/lib/apt/lists/*
 
-RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-    locale-gen en_US.UTF-8 && \
-    update-locale LANG=en_US.UTF-8
-
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
-
-FROM requirements as builder
 WORKDIR /qt5
 RUN git clone https://github.com/qt/qt5.git
+
 WORKDIR /qt5/qt5
+
 ARG QT_VERSION=6.7.2
 ENV QT_VERSION=${QT_VERSION}
+
 RUN git switch $QT_VERSION && perl init-repository
 
 # Default configuration (disable webengine, it's take a lot of time to build, even with high end CPU)
@@ -54,29 +67,11 @@ RUN ./configure -prefix /usr/local/Qt-$QT_VERSION $QT_CONFIG_ARGS
 RUN cmake --build . --parallel
 RUN cmake --install .
 
-ARG DOCKER_IMAGE=debian:bookworm
-FROM ${DOCKER_IMAGE} as final
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update && apt-get -y install \
-# Essential packages to build and link to right libraries
-    build-essential cmake extra-cmake-modules ninja-build \
-    libgl1-mesa-dev libvulkan-dev libssl-dev libglib2.0-dev \
-    libdbus-1-dev libxkbcommon-x11-dev ccache bash locales \
-    && apt-get clean \
-    && apt-get -y autoremove --purge
-
-RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-    locale-gen en_US.UTF-8 && \
-    update-locale LANG=en_US.UTF-8
-
-ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8
+FROM base AS final
 
 ARG QT_VERSION=6.7.2
 ENV QT_VERSION=${QT_VERSION}
+
 COPY --from=builder /usr/local/Qt-$QT_VERSION/ /usr/local/Qt-$QT_VERSION/
 ENV PATH="${PATH}:/usr/local/Qt-$QT_VERSION/bin"
 
@@ -112,8 +107,5 @@ LABEL org.label-schema.schema-version="1.0" \
 
 VOLUME [ "/work" ]
 WORKDIR /work
-
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/bin/bash", "-l"]
