@@ -57,11 +57,11 @@ git clone https://github.com/bensuperpc/docker-qt.git
 The table below shows the available debian versions.
 buster bullseye bookworm:
 
-| Debian | Makefile target |
-| ------ | ------ |
-| Bookworm | bookworm |
-| bullseye | bullseye |
-| buster | buster |
+| Debian | Makefile target | Status |
+| ------ | ------ | ------ |
+| Bookworm | bookworm | OK |
+| bullseye | bullseye | OK |
+| buster | buster | WIP |
 
 ```bash
 make bookworm.test
