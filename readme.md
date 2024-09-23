@@ -7,7 +7,7 @@ You can use this image to build your qt project in docker.
 ## Features
 
 - Build image in docker with qt, no need to install qt (and all dependencies) on your host
-- Easy to use (Makefile)
+- Easy to use with CMakefile and Makefile
 
 ## Build status
 
