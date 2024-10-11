@@ -60,7 +60,7 @@ buster bullseye bookworm:
 
 | Debian | Makefile target | Status |
 | ------ | ------ | ------ |
-| | bookworm | | bookworm | OK |
+| Bookworm | bookworm | OK |
 | bullseye | bullseye | OK |
 | buster | buster | WIP |
 
