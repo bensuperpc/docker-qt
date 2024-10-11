@@ -27,7 +27,7 @@ FROM base AS builder
 
 RUN apt-get update && apt-get -y install \
 # All needed packages
-    debianutils mesa-common-dev meson \
+    debianutils mesa-common-dev meson libclang-dev \
     apt-transport-https ca-certificates gnupg2 \
     libfontconfig1-dev libfreetype6-dev \
     libxext-dev libxfixes-dev libxi-dev libxrender-dev \
@@ -54,7 +54,7 @@ RUN git clone https://github.com/qt/qt5.git
 
 WORKDIR /qt5/qt5
 
-ARG QT_VERSION=6.7.2
+ARG QT_VERSION=6.8.0
 ENV QT_VERSION=${QT_VERSION}
 
 RUN git switch $QT_VERSION && perl init-repository
@@ -69,7 +69,7 @@ RUN cmake --install .
 
 FROM base AS final
 
-ARG QT_VERSION=6.7.2
+ARG QT_VERSION=6.8.0
 ENV QT_VERSION=${QT_VERSION}
 
 COPY --from=builder /usr/local/Qt-$QT_VERSION/ /usr/local/Qt-$QT_VERSION/

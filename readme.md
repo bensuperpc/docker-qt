@@ -7,17 +7,18 @@ You can use this image to build your qt project in docker.
 ## Features
 
 - Build image in docker with qt, no need to install qt (and all dependencies) on your host
-- Easy to use (Makefile)
+- Easy to use with CMakefile and Makefile
 
 ## Build status
 
-| Qt version | Debian version | image tag | Status |
-| :------: | :------: | :------: | :------: |
-| 6.7.2 | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.7.2 | OK |
-| 6.6.3 | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.6.3 | OK |
-| 6.5.3 | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.5.3 | OK |
-| 6.6.3 | bullseye | docker.io/bensuperpc/qt:debian-bullseye-6.6.3 | OK |
-| 6.5.3 | bullseye | docker.io/bensuperpc/qt:debian-bullseye-6.5.3 | OK |
+| Qt version | Distro | version | image tag | Status |
+| :------: | :------: | :------: | :------: | :------: |
+| 6.8.0 | ubuntu | 24.04 | docker.io/bensuperpc/qt:ubuntu-24.04-6.7.2 | WIP |
+| 6.7.2 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.7.2 | OK |
+| 6.6.3 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.6.3 | OK |
+| 6.5.3 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.5.3 | OK |
+| 6.6.3 | debian | bullseye | docker.io/bensuperpc/qt:debian-bullseye-6.6.3 | OK |
+| 6.5.3 | debian | bullseye | docker.io/bensuperpc/qt:debian-bullseye-6.5.3 | OK |
 
 ## Requirements
 
@@ -57,11 +58,11 @@ git clone https://github.com/bensuperpc/docker-qt.git
 The table below shows the available debian versions.
 buster bullseye bookworm:
 
-| Debian | Makefile target |
-| ------ | ------ |
-| Bookworm | bookworm |
-| bullseye | bullseye |
-| buster | buster |
+| Debian | Makefile target | Status |
+| ------ | ------ | ------ |
+| | bookworm | | bookworm | OK |
+| bullseye | bullseye | OK |
+| buster | buster | WIP |
 
 ```bash
 make bookworm.test

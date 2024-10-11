@@ -1,8 +1,8 @@
 #//////////////////////////////////////////////////////////////
 #//                                                          //
-#//  docker-multimedia, 2023                                 //
+#//  docker-qt, 2023                                         //
 #//  Created: 04 February, 2023                              //
-#//  Modified: 16 June, 2024                                 //
+#//  Modified: 05 October, 2024                              //
 #//  file: -                                                 //
 #//  -                                                       //
 #//  Source:                                                 //
@@ -11,22 +11,18 @@
 #//                                                          //
 #//////////////////////////////////////////////////////////////
 
-# Base image
-BASE_IMAGE_REGISTRY := docker.io
-BASE_IMAGE_NAME := debian
-BASE_IMAGE_TAGS := bookworm bullseye buster
+SUBDIRS := debian ubuntu fedora
 
 # Output docker image
 PROJECT_NAME := qt
 AUTHOR := bensuperpc
 REGISTRY := docker.io
-WEB_SITE := bensuperpc.org
 
-IMAGE_VERSION := 6.6.3
-
-USER := $(shell whoami)
-UID := $(shell id -u ${USER})
-GID := $(shell id -g ${USER})
+IMAGE_VERSION := 6.8.0
+# linux/amd64,linux/amd64/v3, linux/arm64, linux/riscv64, linux/ppc64
+ARCH_LIST := linux/amd64
+comma:= ,
+PLATFORMS := $(subst $() $(),$(comma),$(ARCH_LIST))
 
 # Max CPU and memory
 CPUS := 8.0
@@ -40,162 +36,66 @@ BUILD_MEMORY := 16GB
 # Qt config
 QT_VERSION := $(IMAGE_VERSION)
 # Default configuration (disable webengine, it's take a lot of time to build, even with high end CPU)
-QT_CONFIG_ARGS := -skip qtwebengine -nomake examples -nomake tests -opensource -confirm-license -release
+QT_CONFIG_ARGS := -skip qtwebengine -nomake examples -nomake tests \
+	-opensource -confirm-license -release -shared
 
-TEST_CMD := ./tests/tests.sh
+# Custom targets
+CUSTOM_TARGETS := help
 
-PROGRESS_OUTPUT := plain
+# Merge all variables
+MAKEFILE_VARS := PROJECT_NAME=$(PROJECT_NAME) AUTHOR=$(AUTHOR) REGISTRY=$(REGISTRY) \
+	IMAGE_VERSION=$(IMAGE_VERSION) PLATFORMS="$(PLATFORMS)" \
+	CPUS=$(CPUS) CPU_SHARES=$(CPU_SHARES) MEMORY=$(MEMORY) MEMORY_RESERVATION=$(MEMORY_RESERVATION) \
+	QT_VERSION=$(QT_VERSION) QT_CONFIG_ARGS="$(QT_CONFIG_ARGS)"
 
-ARCH_LIST := linux/amd64
-# linux/amd64,linux/amd64/v3, linux/arm64, linux/riscv64, linux/ppc64
-comma:= ,
-PLATFORMS := $(subst $() $(),$(comma),$(ARCH_LIST))
+.PHONY: all clean build test purge update push pull $(SUBDIRS) $(CUSTOM_TARGETS)
 
-IMAGE_NAME := $(PROJECT_NAME)
-OUTPUT_IMAGE := $(AUTHOR)/$(IMAGE_NAME)
+default: all
 
-# Docker config
-DOCKERFILE := Dockerfile
-DOCKER_EXEC := docker
-DOCKER_DRIVER := --load
-# --push
+$(SUBDIRS):
+	$(MAKE) $(MAKEFILE_VARS) -C $@ all
 
-# Git config
-GIT_SHA := $(shell git rev-parse HEAD)
-GIT_ORIGIN := $(shell git config --get remote.origin.url) 
+all: $(addsuffix -all, $(SUBDIRS))
 
-DATE := $(shell date -u +"%Y%m%d")
-UUID := $(shell uuidgen)
+%.all:
+	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.all,%,$@) all
 
-.PHONY: all test push pull run
+build: $(addsuffix .build, $(SUBDIRS))
 
-all: $(addsuffix .test,$(BASE_IMAGE_TAGS))
+%.build:
+	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.build,%,$@) build
 
-build: $(BASE_IMAGE_TAGS)
+test: $(addsuffix .test, $(SUBDIRS))
 
-test: $(addsuffix .test,$(BASE_IMAGE_TAGS))
+%.test:
+	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.test,%,$@) test
 
-push: $(addsuffix .push,$(BASE_IMAGE_TAGS))
+clean: $(addsuffix .clean, $(SUBDIRS))
 
-pull: $(addsuffix .pull,$(BASE_IMAGE_TAGS))
+%.clean:
+	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.clean,%,$@) clean
 
-.PHONY: $(BASE_IMAGE_TAGS)
-$(BASE_IMAGE_TAGS): $(Dockerfile)
-	$(DOCKER_EXEC) buildx build . --file $(DOCKERFILE) \
-		--platform $(PLATFORMS) --progress $(PROGRESS_OUTPUT) \
-		--tag $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$@-$(IMAGE_VERSION)-$(DATE)-$(GIT_SHA) \
-		--tag $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$@-$(IMAGE_VERSION)-$(DATE) \
-		--tag $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$@-$(IMAGE_VERSION) \
-		--tag $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$@ \
-		--memory $(BUILD_MEMORY) --cpu-shares $(BUILD_CPU_SHARES) --compress \
-		--build-arg BUILD_DATE=$(DATE) --build-arg DOCKER_IMAGE=$(BASE_IMAGE_REGISTRY)/$(BASE_IMAGE_NAME):$@ \
-		--build-arg IMAGE_VERSION=$(IMAGE_VERSION) --build-arg PROJECT_NAME=$(PROJECT_NAME) \
-		--build-arg VCS_REF=$(GIT_SHA) --build-arg VCS_URL=$(GIT_ORIGIN) \
-		--build-arg AUTHOR=$(AUTHOR) --build-arg URL=$(WEB_SITE) \
-		--build-arg QT_VERSION=$(QT_VERSION) --build-arg QT_CONFIG_ARGS="$(QT_CONFIG_ARGS)" \
-		$(DOCKER_DRIVER)
+purge: $(addsuffix .purge, $(SUBDIRS))
 
-.SECONDEXPANSION:
-$(addsuffix .build,$(BASE_IMAGE_TAGS)): $$(basename $$@)
+%.purge:
+	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.purge,%,$@) purge
 
-.SECONDEXPANSION:
-$(addsuffix .test,$(BASE_IMAGE_TAGS)): $$(basename $$@)
-	$(DOCKER_EXEC) run --rm \
-		--security-opt no-new-privileges --read-only --user $(UID):$(GID) \
-		--mount type=bind,source=$(shell pwd),target=/work --workdir /work \
-		--mount type=tmpfs,target=/tmp,tmpfs-mode=1777,tmpfs-size=$(TMPFS_SIZE) \
-		--platform $(PLATFORMS) \
-		--cpus $(CPUS) --cpu-shares $(CPU_SHARES) --memory $(MEMORY) --memory-reservation $(MEMORY_RESERVATION) \
-		--name $(IMAGE_NAME)-$(BASE_IMAGE_NAME)-$(basename $@)-$(DATE)-$(GIT_SHA)-$(UUID) \
-		$(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION)-$(DATE)-$(GIT_SHA) \
-		$(TEST_CMD)
+update: $(addsuffix .update, $(SUBDIRS))
 
-#--cap-drop ALL --cap-add SYS_PTRACE	  --device=/dev/kvm
+%.update:
+	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.update,%,$@) update
 
-.SECONDEXPANSION:
-$(addsuffix .run,$(BASE_IMAGE_TAGS)): $$(basename $$@)
-	$(DOCKER_EXEC) run -it \
-		--security-opt no-new-privileges --read-only --user $(UID):$(GID) \
-		--mount type=bind,source=$(shell pwd),target=/work --workdir /work \
-		--mount type=tmpfs,target=/tmp,tmpfs-mode=1777,tmpfs-size=$(TMPFS_SIZE) \
-		--platform $(PLATFORMS) \
-		--cpus $(CPUS) --cpu-shares $(CPU_SHARES) --memory $(MEMORY) --memory-reservation $(MEMORY_RESERVATION) \
-		--name $(IMAGE_NAME)-$(BASE_IMAGE_NAME)-$(basename $@)-$(DATE)-$(GIT_SHA)-$(UUID) \
-		$(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION)-$(DATE)-$(GIT_SHA)
+push: $(addsuffix .push, $(SUBDIRS))
 
-.SECONDEXPANSION:
-$(addsuffix .push,$(BASE_IMAGE_TAGS)): $$(basename $$@)
-	@echo "Pushing $(REGISTRY)/$(OUTPUT_IMAGE)"
-	$(DOCKER_EXEC) push $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)
-	$(DOCKER_EXEC) push $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION)
-	$(DOCKER_EXEC) push $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION)-$(DATE)
-	$(DOCKER_EXEC) push $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION)-$(DATE)-$(GIT_SHA)
-#   $(DOCKER_EXEC) push $(REGISTRY)/$(OUTPUT_IMAGE) --all-tags
+%.push:
+	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.push,%,$@) push
 
-.SECONDEXPANSION:
-$(addsuffix .pull,$(BASE_IMAGE_TAGS)): $$(basename $$@)
-	@echo "Pulling $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)" 
-	$(DOCKER_EXEC) pull $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)
-	$(DOCKER_EXEC) pull $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION)
-	$(DOCKER_EXEC) pull $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION)-$(DATE)
-	$(DOCKER_EXEC) pull $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION)-$(DATE)-$(GIT_SHA)
+pull: $(addsuffix .pull, $(SUBDIRS))
 
-.PHONY: clean
-clean:
-	@echo "Clean all untagged images"
-	$(DOCKER) system prune -f
-#	$(DOCKE) builder prune -f
+%.pull:
+	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.pull,%,$@) pull
 
-.PHONY: purge
-purge: clean
-	@echo "Remove all $(OUTPUT_IMAGE) images and tags"
-	$(DOCKER_EXEC) images --filter='reference=$(OUTPUT_IMAGE)' --format='{{.Repository}}:{{.Tag}}' | xargs -r $(DOCKER_EXEC) rmi -f
-#   	docker rmi -f $(docker images -f "dangling=true" -q) 2>/dev/null || true
+$(CUSTOM_TARGETS): $(addsuffix .$(CUSTOM_TARGETS), $(SUBDIRS))
 
-.PHONY: update
-update:
-#   Update all docker image
-	$(foreach tag,$(BASE_IMAGE_TAGS),$(DOCKER_EXEC) pull $(BASE_IMAGE_NAME):$(tag);)
-#   Update all submodules to latest
-	git submodule update --init --recursive --remote
-
-# https://github.com/linuxkit/linuxkit/tree/master/pkg/binfmt
-.PHONY: qemu
-qemu:
-	export DOCKER_CLI_EXPERIMENTAL=enabled
-	$(DOCKER_EXEC) run --rm --privileged multiarch/qemu-user-static --reset -p yes
-	$(DOCKER_EXEC) buildx create --name qemu_builder --driver docker-container --use
-	$(DOCKER_EXEC) buildx inspect --bootstrap
-
-.PHONY: help
-help:
-	@echo "Usage: make [target]"
-	@echo ""
-	@echo "Targets:"
-	@echo "  all: Build and test all images"
-	@echo "  build: Build all images"
-	@echo "  test: Test all images"
-	@echo "  push: Push all images"
-	@echo "  pull: Pull all images"
-	@echo "  clean: Clean all untagged images"
-	@echo "  purge: Remove all images and tags"
-	@echo "  update: Update all images and submodules"
-	@echo "  qemu: Install qemu"
-	@echo "  help: Show this help message"
-	@echo ""
-	@echo "  All images: $(BASE_IMAGE_TAGS)"
-	@echo "  Sub targets: $(addsuffix .build,$(BASE_IMAGE_TAGS)) $(addsuffix .test,$(BASE_IMAGE_TAGS)) \
-	$(addsuffix .push,$(BASE_IMAGE_TAGS)) $(addsuffix .pull,$(BASE_IMAGE_TAGS))"
-
-.SECONDEXPANSION:
-$(addsuffix .save,$(BASE_IMAGE_TAGS)): $$(basename $$@)
-	@echo "Not implemented yet"
-#	docker save $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION) | xz -e7 -v -T0 > $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION).tar.xz
-
-#   Bash version
-#	DOCKER_IMAGE=ben/ben:ben; install -Dv /dev/null "$DOCKER_IMAGE".tar.xz && docker pull "$DOCKER_IMAGE" && docker save "$DOCKER_IMAGE" | xz -e7 -v -T0 > "$DOCKER_IMAGE".tar.xz
-
-.SECONDEXPANSION:
-$(addsuffix .load,$(BASE_IMAGE_TAGS)): $$(basename $$@)
-	@echo "Not implemented yet"
-#	xz -v -d -k < $(REGISTRY)/$(OUTPUT_IMAGE):$(BASE_IMAGE_NAME)-$(basename $@)-$(IMAGE_VERSION).tar.xz | docker load
+%.$(CUSTOM_TARGETS):
+	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.$(CUSTOM_TARGETS),%,$@) $(CUSTOM_TARGETS)
