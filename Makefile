@@ -11,18 +11,24 @@
 #//                                                          //
 #//////////////////////////////////////////////////////////////
 
-SUBDIRS := debian ubuntu fedora
+SUBDIRS := debian ubuntu fedora archlinux
+
+# Base image
+BASE_IMAGE_REGISTRY := docker.io
+#BASE_IMAGE_NAME :=
+#BASE_IMAGE_TAGS :=
 
 # Output docker image
 PROJECT_NAME := qt
 AUTHOR := bensuperpc
 REGISTRY := docker.io
+WEB_SITE := bensuperpc.org
 
 IMAGE_VERSION := 6.8.0
-# linux/amd64,linux/amd64/v3, linux/arm64, linux/riscv64, linux/ppc64
-ARCH_LIST := linux/amd64
-comma:= ,
-PLATFORMS := $(subst $() $(),$(comma),$(ARCH_LIST))
+
+USER := $(shell whoami)
+UID := $(shell id -u ${USER})
+GID := $(shell id -g ${USER})
 
 # Max CPU and memory
 CPUS := 8.0
@@ -39,6 +45,30 @@ QT_VERSION := $(IMAGE_VERSION)
 QT_CONFIG_ARGS := -skip qtwebengine -nomake examples -nomake tests \
 	-opensource -confirm-license -release -shared
 
+TEST_CMD := ./tests/tests.sh
+
+PROGRESS_OUTPUT := plain
+
+# linux/amd64,linux/amd64/v3, linux/arm64, linux/riscv64, linux/ppc64
+ARCH_LIST := linux/amd64
+comma:= ,
+PLATFORMS := $(subst $() $(),$(comma),$(ARCH_LIST))
+
+IMAGE_NAME := $(PROJECT_NAME)
+OUTPUT_IMAGE := $(AUTHOR)/$(IMAGE_NAME)
+
+# Docker config
+DOCKERFILE := Dockerfile
+DOCKER_EXEC := docker
+DOCKER_DRIVER := --load
+
+# Git config
+GIT_SHA := $(shell git rev-parse HEAD)
+GIT_ORIGIN := $(shell git config --get remote.origin.url) 
+
+DATE := $(shell date -u +"%Y%m%d")
+UUID := $(shell uuidgen)
+
 # Custom targets
 CUSTOM_TARGETS := help
 
@@ -46,7 +76,14 @@ CUSTOM_TARGETS := help
 MAKEFILE_VARS := PROJECT_NAME=$(PROJECT_NAME) AUTHOR=$(AUTHOR) REGISTRY=$(REGISTRY) \
 	IMAGE_VERSION=$(IMAGE_VERSION) PLATFORMS="$(PLATFORMS)" \
 	CPUS=$(CPUS) CPU_SHARES=$(CPU_SHARES) MEMORY=$(MEMORY) MEMORY_RESERVATION=$(MEMORY_RESERVATION) \
-	QT_VERSION=$(QT_VERSION) QT_CONFIG_ARGS="$(QT_CONFIG_ARGS)"
+	BUILD_CPU_SHARES=$(BUILD_CPU_SHARES) BUILD_MEMORY=$(BUILD_MEMORY) \
+	QT_VERSION=$(QT_VERSION) QT_CONFIG_ARGS="$(QT_CONFIG_ARGS)" \
+	WEB_SITE=$(WEB_SITE) BASE_IMAGE_REGISTRY=$(BASE_IMAGE_REGISTRY) \
+	DOCKERFILE=$(DOCKERFILE) DOCKER_EXEC=$(DOCKER_EXEC) DOCKER_DRIVER=$(DOCKER_DRIVER) \
+	GIT_SHA=$(GIT_SHA) GIT_ORIGIN=$(GIT_ORIGIN) DATE=$(DATE) UUID=$(UUID) \
+	USER=$(USER) UID=$(UID) GID=$(GID) TMPFS_SIZE=$(TMPFS_SIZE) \
+	TEST_CMD=$(TEST_CMD) PROGRESS_OUTPUT=$(PROGRESS_OUTPUT) \
+	OUTPUT_IMAGE=$(OUTPUT_IMAGE) IMAGE_NAME=$(IMAGE_NAME)
 
 .PHONY: all clean build test purge update push pull $(SUBDIRS) $(CUSTOM_TARGETS)
 

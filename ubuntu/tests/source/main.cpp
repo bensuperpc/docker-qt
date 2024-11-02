@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-    const QUrl url(u"qrc:/bensuperpc.org/bensuperpc/qml/main.qml"_qs);
+    const QUrl url("qrc:/bensuperpc.org/bensuperpc/qml/main.qml");
 
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreated, &app,
