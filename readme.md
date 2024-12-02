@@ -13,7 +13,7 @@ You can use this image to build your qt project in docker.
 
 | Qt version | Distro | version | image tag | Status |
 | :------: | :------: | :------: | :------: | :------: |
-| 6.8.0 | ubuntu | 24.04 | docker.io/bensuperpc/qt:ubuntu-24.04-6.7.2 | WIP |
+| 6.8.1 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.8.1 | OK |
 | 6.7.2 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.7.2 | OK |
 | 6.6.3 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.6.3 | OK |
 | 6.5.3 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.5.3 | OK |
@@ -25,9 +25,9 @@ You can use this image to build your qt project in docker.
 | Component | Min | Recommanded |
 | ------ | ------ | ------ |
 | CPU | 2 cores | 8 cores |
-| RAM | 16 GB | 32 GB |
+| RAM | 16 GB | 32 GB (48 GB for webengine) |
 | GPU | CLI | CLI |
-| Disk space | HDD 25 GB | SSD 70 GB |
+| Disk space | HDD 30 GB | SSD 50 GB |
 | Internet | 10 Mbps | 100 Mbps |
 | OS | Linux | Linux |
 | Docker | - | - |
@@ -50,7 +50,7 @@ With this configuration, you can build qt in 40min (2h30 whith webengine etc...)
 Clone this repository
 
 ```bash
-git clone https://github.com/bensuperpc/docker-qt.git
+git clone --recursive https://github.com/bensuperpc/docker-qt.git
 ```
 
 ## Build image
@@ -72,7 +72,7 @@ make bookworm.test
 
 | Option | Default | Description |
 | ------ | ------ | ------ |
-| QT_VERSION | 6.7.1 | Qt version (Based of IMAGE_VERSION) |
+| QT_VERSION | 6.8.1 | Qt version (Based of IMAGE_VERSION) |
 | AUTHOR | bensuperpc | Author name and 1st part of docker image name |
 | PROJECT_NAME | qt | Project name and 2nd part of docker image name |
 

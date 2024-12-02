@@ -22,7 +22,7 @@ AUTHOR := bensuperpc
 REGISTRY := docker.io
 WEB_SITE := bensuperpc.org
 
-IMAGE_VERSION := 6.8.0
+IMAGE_VERSION := 6.8.1
 
 USER := $(shell whoami)
 UID := $(shell id -u ${USER})

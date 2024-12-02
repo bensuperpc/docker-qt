@@ -10,5 +10,5 @@ docker run --rm \
         --platform linux/amd64 \
         --cpus 8.0 --cpu-shares 1024 --memory 16GB --memory-reservation 2GB \
         --name qt-debian-bookworm \
-        docker.io/bensuperpc/qt:debian-bookworm-6.8.0 \
+        docker.io/bensuperpc/qt:debian-bookworm-6.8.1 \
         bash -c "cmake -B build -S . -G Ninja -DQT_DEBUG_FIND_PACKAGE=ON && cmake --build build"

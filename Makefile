@@ -24,7 +24,7 @@ AUTHOR := bensuperpc
 REGISTRY := docker.io
 WEB_SITE := bensuperpc.org
 
-IMAGE_VERSION := 6.8.0
+IMAGE_VERSION := 6.8.1
 
 USER := $(shell whoami)
 UID := $(shell id -u ${USER})
@@ -47,8 +47,6 @@ QT_CONFIG_ARGS := -skip qtwebengine -nomake examples -nomake tests \
 
 TEST_CMD := ./tests/tests.sh
 
-PROGRESS_OUTPUT := plain
-
 # linux/amd64,linux/amd64/v3, linux/arm64, linux/riscv64, linux/ppc64
 ARCH_LIST := linux/amd64
 comma:= ,
@@ -61,6 +59,7 @@ OUTPUT_IMAGE := $(AUTHOR)/$(IMAGE_NAME)
 DOCKERFILE := Dockerfile
 DOCKER_EXEC := docker
 DOCKER_DRIVER := --load
+PROGRESS_OUTPUT := plain
 
 # Git config
 GIT_SHA := $(shell git rev-parse HEAD)
