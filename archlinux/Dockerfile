@@ -1,9 +1,9 @@
-# Base image
-ARG DOCKER_IMAGE=archlinux:base
-FROM ${DOCKER_IMAGE} AS base
+ARG BASE_IMAGE=archlinux:base
+FROM ${BASE_IMAGE} AS base
 
-ENV DEBIAN_FRONTEND=noninteractive
-
+RUN pacman-key --init && pacman -Sy archlinux-keyring --noconfirm && pacman -Syu --noconfirm && \
+    pacman -S --noconfirm \
+#   ffmpeg and video tools
 RUN pacman -Syu --noconfirm && pacman -S --noconfirm \
     # Essential packages
     base-devel git cmake extra-cmake-modules ninja automake autoconf \
@@ -39,7 +39,7 @@ RUN git clone https://github.com/qt/qt5.git
 
 WORKDIR /qt5/qt5
 
-ARG QT_VERSION=6.8.1
+ARG QT_VERSION=6.8.3
 ENV QT_VERSION=${QT_VERSION}
 
 RUN git switch $QT_VERSION && perl init-repository
@@ -54,7 +54,8 @@ RUN cmake --install .
 
 FROM base AS final
 
-ARG QT_VERSION=6.8.1
+ARG BUILD_DATE=${BUILD_DATE}
+ARG QT_VERSION=6.8.3
 ENV QT_VERSION=${QT_VERSION}
 
 COPY --from=builder /usr/local/Qt-$QT_VERSION/ /usr/local/Qt-$QT_VERSION/
@@ -62,13 +63,11 @@ ENV QT_DIR="/usr/local/Qt-$QT_VERSION"
 ENV Qt6_DIR="/usr/local/Qt-$QT_VERSION/lib/cmake/Qt6"
 ENV CMAKE_PREFIX_PATH="/usr/local/Qt-$QT_VERSION/lib/cmake"
 ENV PATH="/usr/local/Qt-$QT_VERSION/bin:$PATH"
-
-ARG BUILD_DATE=""
 ARG VCS_REF=""
-ARG VCS_URL=""
-ARG PROJECT_NAME=""
-ARG AUTHOR=""
-ARG URL=""
+ARG VCS_URL="https://github.com/bensuperpc/docker-qt"
+ARG OUTPUT_IMAGE_NAME=${OUTPUT_IMAGE_NAME}
+ARG AUTHOR="Bensuperpc"
+ARG URL="https://github.com/bensuperpc"
 
 ARG IMAGE_VERSION="1.0.0"
 ENV IMAGE_VERSION=${IMAGE_VERSION}
@@ -84,8 +83,8 @@ LABEL description="Docker image with qt"
 
 LABEL org.label-schema.schema-version="1.0" \
       org.label-schema.build-date=${BUILD_DATE} \
-      org.label-schema.name=${PROJECT_NAME} \
-      org.label-schema.description="qt" \
+      org.label-schema.name=${OUTPUT_IMAGE_NAME} \
+      org.label-schema.description="qt tools" \
       org.label-schema.version=${IMAGE_VERSION} \
       org.label-schema.vendor=${AUTHOR} \
       org.label-schema.url=${URL} \
@@ -96,8 +95,9 @@ LABEL org.label-schema.schema-version="1.0" \
 VOLUME [ "/work" ]
 WORKDIR /work
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY --from=root-project common/entrypoint.sh /entrypoint.sh
+RUN chmod 755 /entrypoint.sh && chown root:root /entrypoint.sh
 
-ENTRYPOINT [ "/entrypoint.sh" ]
-CMD [ "/bin/bash" ]
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/bin/bash", "-l"]

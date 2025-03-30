@@ -13,6 +13,7 @@ You can use this image to build your qt project in docker.
 
 | Qt version | Distro | version | image tag | Status |
 | :------: | :------: | :------: | :------: | :------: |
+| 6.8.3 | debian | bookworm | docker.io/bensuperpc/qt:6.8.1-debian-bookworm | OK |
 | 6.8.1 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.8.1 | OK |
 | 6.7.2 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.7.2 | OK |
 | 6.6.3 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.6.3 | OK |

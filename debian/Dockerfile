@@ -54,7 +54,7 @@ RUN git clone https://github.com/qt/qt5.git
 
 WORKDIR /qt5/qt5
 
-ARG QT_VERSION=6.8.1
+ARG QT_VERSION=6.8.3
 ENV QT_VERSION=${QT_VERSION}
 
 RUN git switch $QT_VERSION && perl init-repository
@@ -69,7 +69,7 @@ RUN cmake --install .
 
 FROM base AS final
 
-ARG QT_VERSION=6.8.1
+ARG QT_VERSION=6.8.3
 ENV QT_VERSION=${QT_VERSION}
 
 COPY --from=builder /usr/local/Qt-$QT_VERSION/ /usr/local/Qt-$QT_VERSION/
