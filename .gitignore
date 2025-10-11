@@ -1,2 +1,11 @@
-*/build
+build/*
 .vscode/settings.json
+old/*
+debian/common/*
+debian/Dockerfile
+ubuntu/common/*
+ubuntu/Dockerfile
+archlinux/common/*
+archlinux/Dockerfile
+debian-qt5/common/*
+debian-qt5/Dockerfile

@@ -1,0 +1,33 @@
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get -y install \
+    qt6-base-dev \
+    qt6-tools-dev \
+    qt6-3d-dev \
+    qt6-5compat-dev \
+    qt6-base-private-dev \
+    qt6-charts-dev \
+    qt6-connectivity-dev \
+    qt6-declarative-dev \
+    qt6-multimedia-dev \
+    qt6-networkauth-dev \
+    qt6-image-formats-plugins \
+    qt6-serialport-dev \
+    qt6-sensors-dev \
+    qt6-scxml-dev \
+    qml6-module-qtquick \
+    qml6-module-qtquick-controls \
+    qml6-module-qtqml-workerscript \
+    qml6-module-qtquick-window \
+    qml6-module-qtquick-templates \
+    qml6-module-qtquick-dialogs \
+    qml6-module-qtquick-timeline \
+    qml6-module-qtquick-particles \
+    qml6-module-qtquick-layouts \
+    qml6-module-qtquick-nativestyle \
+    qml6-module-qtquick-virtualkeyboard \
+    qml6-module-qtquick3d-physics \
+    && apt-get clean autoclean --yes \
+    && apt-get autoremove --purge --yes
+
+# qt6-datavis3d-dev qt6-location-dev qt6-location-dev qml6-module-qtquick-vectorimage qml6-module-qtquick3d

@@ -1,0 +1,16 @@
+RUN apt-get update && apt-get -y install \
+    qt5-qmake \
+    qtbase5-dev \
+    qttools5-dev \
+    qt3d5-dev \
+    qt5-qmake \
+    libqt53dinput5 \
+    qtbase5-private-dev \
+    libqt5charts5-dev \
+    libqt5multimedia5 \
+    libqt5multimedia5-plugins \
+    libqt5networkauth5-dev \
+    libqt5serialport5-dev \
+    qml \
+    && apt-get clean autoclean --yes \
+    && apt-get autoremove --purge --yes

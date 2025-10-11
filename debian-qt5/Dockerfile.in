@@ -1,0 +1,18 @@
+ARG BASE_IMAGE=debian:bookworm
+FROM ${BASE_IMAGE} AS base
+
+#include "common.base.debian"
+
+#include "common.debian.qt5"
+
+#include "common.locales"
+
+FROM base AS final
+
+#include "common.label-and-env"
+
+VOLUME [ "/work" ]
+WORKDIR /work
+
+CMD ["/bin/bash", "-l"]
+

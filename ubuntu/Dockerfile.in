@@ -1,0 +1,17 @@
+ARG BASE_IMAGE=ubuntu:24.04
+FROM ${BASE_IMAGE} AS base
+
+#include "common.base.debian"
+
+#include "common.ubuntu.qt6"
+
+#include "common.locales"
+
+FROM base AS final
+
+#include "common.label-and-env"
+
+VOLUME [ "/work" ]
+WORKDIR /work
+
+CMD ["/bin/bash", "-l"]

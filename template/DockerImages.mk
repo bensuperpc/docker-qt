@@ -1,8 +1,8 @@
 #//////////////////////////////////////////////////////////////
 #//                                                          //
-#//  docker-multimedia, 2024                                 //
+#//  Generic docker images, 2025                             //
 #//  Created: 30, May, 2021                                  //
-#//  Modified: 14 November, 2024                             //
+#//  Modified: 21 September, 2025                            //
 #//  file: -                                                 //
 #//  -                                                       //
 #//  Source:                                                 //
@@ -28,7 +28,12 @@ GID ?= $(shell id -g ${CURRENT_USER})
 # USER DEFINED VARIABLES
 # =====================
 
-SUBDIRS ?= debian ubuntu fedora archlinux
+SUBDIRS ?= archlinux debian ubuntu
+
+DOCKER_COMPOSITE_SOURCES ?= common.label-and-env common.entrypoint common.user common.locales
+
+DOCKER_COMPOSITE_FOLDER_PATH ?= common/
+DOCKER_COMPOSITE_PATH ?= $(addprefix $(DOCKER_COMPOSITE_FOLDER_PATH),$(DOCKER_COMPOSITE_SOURCES))
 
 AUTHOR ?= bensuperpc
 WEB_SITE ?= bensuperpc.org
@@ -42,10 +47,12 @@ OUTPUT_IMAGE_PATH ?= bensuperpc
 OUTPUT_IMAGE_NAME ?= multimedia
 OUTPUT_IMAGE_VERSION ?= 1.0.0
 
+TAG_WITH_BASE_IMAGE_NAME ?= no
+
 TEST_IMAGE_CMD ?= ./test/test.sh
-TEST_IMAGE_ARGS ?=
+TEST_IMAGE_ARGS ?= -e PUID=$(UID) -e PGID=$(GID) -e USERNAME=bensuperpc
 RUN_IMAGE_CMD ?=
-RUN_IMAGE_ARGS ?=
+RUN_IMAGE_ARGS ?= -e PUID=$(UID) -e PGID=$(GID) -e USERNAME=bensuperpc
 
 BUILD_IMAGE_ARGS ?=
 
@@ -69,12 +76,14 @@ CPUS ?= 8.0
 CPU_SHARES ?= 1024
 MEMORY ?= 16GB
 MEMORY_RESERVATION ?= 2GB
-TMPFS_SIZE ?= 4GB
+TMPFS_SIZE ?= 4g
 BUILD_IMAGE_CPU_SHARES ?= 1024
 BUILD_IMAGE_MEMORY ?= 16GB
 
 # Custom targets
 CUSTOM_TARGET ?= help
+
+TARGETS := all build test run clean purge update push pull version generate ${CUSTOM_TARGET}
 
 # Merge all variables
 MAKEFILE_VARS ?= AUTHOR="$(AUTHOR)" PLATFORMS="$(PLATFORMS)" \
@@ -86,76 +95,32 @@ MAKEFILE_VARS ?= AUTHOR="$(AUTHOR)" PLATFORMS="$(PLATFORMS)" \
 	TEST_IMAGE_CMD="$(TEST_IMAGE_CMD)" RUN_IMAGE_CMD="$(RUN_IMAGE_CMD)" PROGRESS_OUTPUT="$(PROGRESS_OUTPUT)" \
 	BASE_IMAGE_REGISTRY="$(BASE_IMAGE_REGISTRY)" BUILD_IMAGE_ARGS="$(BUILD_IMAGE_ARGS)" \
 	OUTPUT_IMAGE_REGISTRY="$(OUTPUT_IMAGE_REGISTRY)" OUTPUT_IMAGE_PATH="$(OUTPUT_IMAGE_PATH)" \
-	OUTPUT_IMAGE_NAME="$(OUTPUT_IMAGE_NAME)" OUTPUT_IMAGE_VERSION="$(OUTPUT_IMAGE_VERSION)"
+	OUTPUT_IMAGE_NAME="$(OUTPUT_IMAGE_NAME)" OUTPUT_IMAGE_VERSION="$(OUTPUT_IMAGE_VERSION)" \
+	DOCKER_COMPOSITE_FOLDER_PATH="$(DOCKER_COMPOSITE_FOLDER_PATH)" \
+	DOCKER_COMPOSITE_SOURCES="$(DOCKER_COMPOSITE_SOURCES)" \
+	DOCKER_COMPOSITE_PATH="$(DOCKER_COMPOSITE_PATH)" TAG_WITH_BASE_IMAGE_NAME="$(TAG_WITH_BASE_IMAGE_NAME)"
 
-default: all
+
+.PHONY: default
+default: $(addsuffix .test, $(SUBDIRS))
 
 .PHONY: $(SUBDIRS)
 $(SUBDIRS):
-	$(MAKE) $(MAKEFILE_VARS) -C $@ all
+	rsync --progress --human-readable --archive --acls --xattrs --bwlimit=500000 --stats --delete-during \
+	    $(DOCKER_COMPOSITE_FOLDER_PATH) $@/common/
 
-.PHONY: all
-all: $(addsuffix .all, $(SUBDIRS))
+.PHONY: $(TARGETS)
+$(TARGETS): %: $(addsuffix .%,$(SUBDIRS))
 
-%.all:
-	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.all,%,$@) all
+.SECONDEXPANSION:
+$(foreach t,$(TARGETS),$(addsuffix .$(t),$(SUBDIRS))): $$(basename $$@)
+	$(MAKE) $(MAKEFILE_VARS) -C $(basename $@) $(subst .,,$(suffix $@))
 
-.PHONY: build
-build: $(addsuffix .build, $(SUBDIRS))
-
-%.build:
-	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.build,%,$@) build
-
-.PHONY: test
-test: $(addsuffix .test, $(SUBDIRS))
-
-%.test:
-	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.test,%,$@) test
-
-.PHONY: run
-run: $(addsuffix .run, $(SUBDIRS))
-
-%.run:
-	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.run,%,$@) run
-
-.PHONY: version
-version: $(addsuffix .version, $(SUBDIRS))
-
-%.version:
-	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.version,%,$@) version
-
-.PHONY: clean
-clean: $(addsuffix .clean, $(SUBDIRS))
-
-%.clean:
-	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.clean,%,$@) clean
-
-.PHONY: purge
-purge: $(addsuffix .purge, $(SUBDIRS))
-
-%.purge:
-	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.purge,%,$@) purge
-
-.PHONY: update
-update: $(addsuffix .update, $(SUBDIRS))
-
-%.update:
-	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.update,%,$@) update
-
-.PHONY: push
-push: $(addsuffix .push, $(SUBDIRS))
-
-%.push:
-	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.push,%,$@) push
-
-.PHONY: pull
-pull: $(addsuffix .pull, $(SUBDIRS))
-
-%.pull:
-	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.pull,%,$@) pull
-
-.PHONY: $(CUSTOM_TARGET)
-$(CUSTOM_TARGET): $(addsuffix .$(CUSTOM_TARGET), $(SUBDIRS))
-
-%.$(CUSTOM_TARGET):
-	$(MAKE) $(MAKEFILE_VARS) -C $(patsubst %.$(CUSTOM_TARGET),%,$@) $(CUSTOM_TARGET)
+.SECONDEXPANSION:
+$(foreach d,$(SUBDIRS),$(d).%): $(subst $(firstword $(subst ., ,$@)).,,$@)
+	@version_action=$(subst $(firstword $(subst ., ,$@)).,,$@); \
+	echo ">>> Rsync for $(firstword $(subst ., ,$@))"; \
+	rsync --progress --human-readable --archive --acls --xattrs --bwlimit=500000 --stats --delete-during \
+		$(DOCKER_COMPOSITE_FOLDER_PATH) $(firstword $(subst ., ,$@))/common/; \
+	echo ">>> Executing in $(firstword $(subst ., ,$@)): $$version_action"; \
+	$(MAKE) $(MAKEFILE_VARS) -C $(firstword $(subst ., ,$@)) $$version_action

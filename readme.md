@@ -11,27 +11,23 @@ You can use this image to build your qt project in docker.
 
 ## Build status
 
-| Qt version | Distro | version | image tag | Status |
-| :------: | :------: | :------: | :------: | :------: |
-| 6.8.3 | debian | bookworm | docker.io/bensuperpc/qt:6.8.1-debian-bookworm | OK |
-| 6.8.1 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.8.1 | OK |
-| 6.7.2 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.7.2 | OK |
-| 6.6.3 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.6.3 | OK |
-| 6.5.3 | debian | bookworm | docker.io/bensuperpc/qt:debian-bookworm-6.5.3 | OK |
-| 6.6.3 | debian | bullseye | docker.io/bensuperpc/qt:debian-bullseye-6.6.3 | OK |
-| 6.5.3 | debian | bullseye | docker.io/bensuperpc/qt:debian-bullseye-6.5.3 | OK |
+| Qt version | Distro | version  |              image tag               | Status |
+| :--------: | :----: | :------: | :----------------------------------: | :----: |
+|   6.4.2    | debian | bookworm |  docker.io/bensuperpc/qt:debian-12   |   OK   |
+|   6.8.2    | debian |  trixie  |  docker.io/bensuperpc/qt:debian-13   |   OK   |
+|   6.4.2    | ubuntu |  noble   | docker.io/bensuperpc/qt:ubuntu-24.04 |   OK   |
 
 ## Requirements
 
-| Component | Min | Recommanded |
-| ------ | ------ | ------ |
-| CPU | 2 cores | 8 cores |
-| RAM | 16 GB | 32 GB (48 GB for webengine) |
-| GPU | CLI | CLI |
-| Disk space | HDD 30 GB | SSD 50 GB |
-| Internet | 10 Mbps | 100 Mbps |
-| OS | Linux | Linux |
-| Docker | - | - |
+| Component  | Min       | Recommanded                 |
+| ---------- | --------- | --------------------------- |
+| CPU        | 2 cores   | 8 cores                     |
+| RAM        | 16 GB     | 32 GB (48 GB for webengine) |
+| GPU        | CLI       | CLI                         |
+| Disk space | HDD 30 GB | SSD 50 GB                   |
+| Internet   | 10 Mbps   | 100 Mbps                    |
+| OS         | Linux     | Linux                       |
+| Docker     | -         | -                           |
 
 ### Tested on
 
@@ -59,11 +55,11 @@ git clone --recursive https://github.com/bensuperpc/docker-qt.git
 The table below shows the available debian versions.
 buster bullseye bookworm:
 
-| Debian | Makefile target | Status |
-| ------ | ------ | ------ |
-| Bookworm | bookworm | OK |
-| bullseye | bullseye | OK |
-| buster | buster | WIP |
+| Debian   | Makefile target | Status |
+| -------- | --------------- | ------ |
+| Bookworm | bookworm        | OK     |
+| bullseye | bullseye        | OK     |
+| buster   | buster          | WIP    |
 
 ```bash
 make bookworm.test
@@ -71,11 +67,11 @@ make bookworm.test
 
 ### Makefile options
 
-| Option | Default | Description |
-| ------ | ------ | ------ |
-| QT_VERSION | 6.8.1 | Qt version (Based of IMAGE_VERSION) |
-| AUTHOR | bensuperpc | Author name and 1st part of docker image name |
-| PROJECT_NAME | qt | Project name and 2nd part of docker image name |
+| Option       | Default    | Description                                    |
+| ------------ | ---------- | ---------------------------------------------- |
+| QT_VERSION   | 6.8.1      | Qt version (Based of IMAGE_VERSION)            |
+| AUTHOR       | bensuperpc | Author name and 1st part of docker image name  |
+| PROJECT_NAME | qt         | Project name and 2nd part of docker image name |
 
 
 ### Start the container

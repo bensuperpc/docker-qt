@@ -1,0 +1,25 @@
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get -y install \
+    build-essential \
+    automake autoconf libtool pkg-config \
+    cmake \
+    cmake-extras \
+    extra-cmake-modules \
+    meson \
+    ninja-build \
+    git \
+    wget \
+    binutils \
+    libglx-dev \
+    libwayland-dev \
+    libxrandr-dev \
+    libgl1-mesa-dev libvulkan-dev libssl-dev libglib2.0-dev \
+    libdbus-1-dev libxkbcommon-x11-dev locales \
+    bash-completion \
+    locales locales-all \
+    ccache \
+    && (apt-get install -y mold || true) \
+    && apt-get clean autoclean --yes \
+    && apt-get autoremove --purge --yes \
+    && rm -rf /var/lib/apt/lists/*

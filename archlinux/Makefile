@@ -1,8 +1,8 @@
 #//////////////////////////////////////////////////////////////
 #//                                                          //
-#//  docker-multimedia, 2024                                 //
+#//  docker-multimedia, 2025                                 //
 #//  Created: 30, May, 2021                                  //
-#//  Modified: 14 November, 2024                             //
+#//  Modified: 30 March, 2025                                //
 #//  file: -                                                 //
 #//  -                                                       //
 #//  Source:                                                 //
@@ -23,8 +23,10 @@ WEB_SITE ?= bensuperpc.org
 
 OUTPUT_IMAGE_REGISTRY ?= docker.io
 OUTPUT_IMAGE_PATH ?= bensuperpc
-OUTPUT_IMAGE_NAME ?= qt
-OUTPUT_IMAGE_VERSION ?= 6.8.3
+OUTPUT_IMAGE_NAME ?= multimedia
+OUTPUT_IMAGE_VERSION ?= 1.0.0
+
+TAG_WITH_BASE_IMAGE_NAME ?= yes
 
 WORKDIR ?= /work
 
@@ -33,16 +35,13 @@ CPUS ?= 8.0
 CPU_SHARES ?= 1024
 MEMORY ?= 16GB
 MEMORY_RESERVATION ?= 2GB
-TMPFS_SIZE ?= 4GB
+TMPFS_SIZE ?= 4gb
 BUILD_IMAGE_CPU_SHARES ?= 1024
 BUILD_IMAGE_MEMORY ?= 16GB
 
-# Default configuration (disable webengine, it's take a lot of time to build, even with high end CPU)
-BUILD_IMAGE_ARGS ?= --build-arg QT_VERSION=$(IMAGE_VERSION) --build-arg QT_CONFIG_ARGS=-skip qtwebengine -nomake examples -nomake tests -opensource -confirm-license -release -shared
-
 TEST_IMAGE_CMD ?= ls
-TEST_IMAGE_ARGS ?=
+TEST_IMAGE_ARGS ?= -e PUID=$(UID) -e PGID=$(GID) -e USERNAME=bensuperpc
 RUN_IMAGE_CMD ?=
-RUN_IMAGE_ARGS ?=
+RUN_IMAGE_ARGS ?= -e PUID=$(UID) -e PGID=$(GID) -e USERNAME=bensuperpc
 
 include ../template/DockerImage.mk

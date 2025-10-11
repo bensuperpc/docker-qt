@@ -19,28 +19,24 @@ jobs:
       fail-fast: false
       matrix:
         images:
-        - image: buster
-          tag: 'all'
-        - image: bullseye
-          tag: 'all'
-        - image: bookworm
-          tag: 'all'
+        - image: debian
+          version: 12
+        - image: debian
+          version: 13
+        - image: ubuntu
+          version: 24.04
     steps:
       - name: "Checkout Code"
         uses: actions/checkout@v4.2.1
         with:
 #          submodules: 'recursive'
           fetch-depth: 1
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install 
-      - name: Build
-        run: make ${{ matrix.images.image }}
-      - name: Test the image
-        run: CPUS=2.0 make ${{ matrix.images.image }}.test
       - name: clean the image
-        run: make ${{ matrix.images.image }}.clean
-      - name: purge the image
-        run: make ${{ matrix.images.image }}.purge
+        run: make ${{ matrix.images.image }}.${{ matrix.version }}.clean
+      - name: Build
+        run: make ${{ matrix.images.image }}.${{ matrix.version }}.build
+      - name: Test the image
+        run: CPUS=2.0 make ${{ matrix.images.image }}.${{ matrix.version }}.test
 #      - name: "Push to hub.docker.com"
 #        if: github.ref == 'refs/heads/main'
 #        run: |

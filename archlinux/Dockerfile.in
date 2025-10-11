@@ -1,0 +1,13 @@
+ARG BASE_IMAGE=archlinux:base
+FROM ${BASE_IMAGE} AS base
+
+#include "common.archlinux.qt6"
+
+FROM base AS final
+
+#include "common.label-and-env"
+
+VOLUME [ "/work" ]
+WORKDIR /work
+
+CMD ["/bin/bash", "-l"]

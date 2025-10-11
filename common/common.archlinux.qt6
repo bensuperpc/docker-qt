@@ -1,0 +1,31 @@
+RUN pacman-key --init && pacman -Sy archlinux-keyring --noconfirm && pacman -Syu --noconfirm && \
+    pacman -S --noconfirm \
+    base-devel \
+    automake autoconf libtool pkgconf \
+    cmake cmake-extras meson ninja \
+    git wget binutils \
+    mesa vulkan-headers openssl glib2 dbus libxkbcommon-x11 \
+    mold bash-completion ccache glibc \
+    qt6-base \
+    qt6-tools \
+    qt6-3d \
+    qt6-5compat \
+    qt6-charts \
+    qt6-connectivity \
+    qt6-declarative \
+    qt6-multimedia \
+    qt6-networkauth \
+    qt6-imageformats \
+    qt6-serialport \
+    qt6-sensors \
+    qt6-scxml \
+    qt6-virtualkeyboard \
+    qt6-quick3d \
+    qt6-quick3dphysics \
+    qt6-graphs \
+    qt6-quicktimeline \
+    qt6-wayland \
+    qt6-svg \
+    qt6-datavis3d \
+    qt6-location \
+    && pacman -Scc --noconfirm
